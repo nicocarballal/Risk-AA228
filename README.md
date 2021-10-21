@@ -1,6 +1,6 @@
 # Risk-AA228
 
-![Risk Logo](images/risk-logo.png "RISK Logo")
+<img src="images/risk-logo.png" width="300"> 
 
 ## Project Contributors
 Jane Boettcher - Undergraduate: Stanford Linguistics '22, Graduate: Stanford Computer Science \
