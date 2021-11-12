@@ -32,10 +32,10 @@ class GameMap:
         self.graph.nodes[node]['team'] = team
     
     def getTeam(self, node):
-        return self.graph.nodes[node]['team'].getName()
+        return self.graph.nodes[node]['team']
 
     def setNumTroops(self,node,new_num):
-        self.graph.nodes[node]['num_troops'] = newNum
+        self.graph.nodes[node]['num_troops'] = new_num
         
     def getTroops(self, node):
         return self.graph.nodes[node]['num_troops']
@@ -54,3 +54,12 @@ class GameMap:
     def getNeighbors(self, node):
         return self.graph.nodes[node]['neighbors']
     
+    
+            
+            
+            
+            
+            
+            
+        
+            
