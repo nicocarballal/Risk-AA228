@@ -48,20 +48,50 @@ class GameTeam:
     def getTroops(self):
         return self.troops
 
-    def addTroops(self, block, troops):
+    def addTroops(self, country, troops):
+        '''
+        Adds a certain number of troops to a given territory on the map and adds the same number 
+        of troops to your team 
+        
+        Inputs: 
+        country --> name of country to add troops to
+        troops --> number of troops to add (this number can be negative if you want to subtract troops)
+        '''
         self.troops += troops
-        self.risk_map.addTroops(block, troops)
+        self.risk_map.addTroops(country, troops)
     
     def getStrategy(self):
+        '''
+        Return your strategy
+        Outputs:
+        - Returns an instance of the strategy class according to your team
+        '''
         return self.strategy
     
-    def changeStrategy(self, strategy):
-        self.strategy = strategy
+    
+    def changeStrategy(self, StrategyClass):
+        '''
+        Change your teams strategy at any given time! 
+        
+        Inputs:
+        - StrategyClass --> Will need to pass the Strategy class like so "self.changeStrategy(RandomStrategy)
+        '''
+        self.strategy = StrategyClass(self)
         
     def getRiskMap(self):
         return self.risk_map
         
     def getPossibleAttacks(self):
+        '''
+        This same function is in Strategy Class as well (will probably want to delete
+        one at some point)
+        
+        
+        Outputs: 
+        - possibleAttacks: Dict
+                    Keys --> Possible attacking country names (strings)
+                    Values --> Possible target country names (strings)
+        '''
         possibleAttacks = {}
         for territory in self.territories:
             if self.risk_map.getTroops(territory) == 1:
@@ -73,22 +103,51 @@ class GameTeam:
         return possibleAttacks 
     
     def playTurn(self):
+        '''
+        Play a turn according to your strategy
+        '''
         return self.strategy.playTurn()
 
     def getNextMove(self):
         return self.strategy.getNextMove()
     
   
-    def makeNextMove(self):
+    def determineAndMakeMove(self):
+        '''
+        Make a move according to your strategy     
+        '''
         next_move = self.getNextMove()
-        print(next_move)
+        
+        if next_move == None:
+            return
+        
+        return self.simNextMove(next_move[0], next_move[1])
+    
+    def makeMove(self, next_move):
+        '''
+        Make a move according to next_move 
+        
+        Inputs:
+        next_move --> type tuple - (str "attacking territory", str "defending territory")
+        
+        
+        '''
         
         return self.simNextMove(next_move[0], next_move[1])
         
+        
     
     def simNextMove(self, attacking_territory, defending_territory):
+        '''
+        Simulate the next move from the attacking territory to the defending territory 
+        
+        Inputs:
+        attacking_territory --> type str - name of attacking territory
+        defending_territory --> type str - name of defending territory
+        '''
         
         defending_team = self.risk_map.getTeam(defending_territory)
+        print("Team {team1} declares attack on Team {team2} from {attacker} to {defender}".format(team1 = self.getName(), team2 = defending_team.getName(), attacker = attacking_territory, defender = defending_territory))
         
         attacking_troops = self.risk_map.getTroops(attacking_territory)
         defending_troops = self.risk_map.getTroops(defending_territory)
