@@ -68,6 +68,17 @@ class Strategy:
         num_troops --> Number of troops you have available to you to add
         '''
         raise Exception('Use subclass of strategy for adding toops')
+        
+    def playTurn(self):
+        self.addTroopsTurn(3) # Default for RISK
+        
+        nextMove = self.getNextMove()
+        possibleAttacks = self.game_team.getPossibleAttacks()
+        i = 0
+        while nextMove != None and i <= len(possibleAttacks)/2:
+            self.game_team.makeMove(nextMove)
+            nextMove = self.getNextMove()
+            i += 1
 
 
 class RandomStrategy(Strategy):
