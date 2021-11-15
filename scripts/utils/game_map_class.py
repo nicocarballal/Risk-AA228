@@ -15,7 +15,8 @@ class GameMap:
                         block: a string describing which block the node belongs to
                         team: a string describing which team occupies it. None if no team occupies it
                         num_troops: the number of troops that occupy it
-                    edges: as per nx.Graph'''
+                    edges: as per nx.Graph
+               team_color_map: keeps an array of which team owns which node'''
         self.blocks = blocks
         self.graph = nx.Graph()
         for b in blocks.keys():
@@ -53,6 +54,18 @@ class GameMap:
    
     def getNeighbors(self, node):
         return self.graph.nodes[node]['neighbors']
+    
+    def getTeamColorMap(self):
+        territories = self.getTerritories()
+        color_map = []
+        for territory in territories:
+            if self.getTeam(territory).getName() == 'red':
+                color_map.append('red')
+            elif self.getTeam(territory).getName() == 'blue':
+                color_map.append('blue')
+            else:
+                color_map.append('green')
+        return color_map
     
     
             

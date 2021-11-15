@@ -2,7 +2,7 @@ from utils.game_map_class import GameMap
 from utils.game_team_class import GameTeam
 import random 
 
-def setGameBoardRandom(team_names, risk_map, strategy_class = None):
+def setGameBoardRandom(team_names, risk_map, strategy_classes = [None, None]):
     '''
     Inputs:
     team_names: Your desired team names
@@ -13,7 +13,12 @@ def setGameBoardRandom(team_names, risk_map, strategy_class = None):
     risk_map: Updated RiskMap with territories and troops assigned
     teams: Array of teams in the RiskMap
     '''
-    teams = [GameTeam(team_name, risk_map, strategy = strategy_class, territories = []) for team_name in team_names]
+    teams = []
+    i = 0
+    for i in range(len(team_names)):
+        strategy_class = strategy_classes[i]
+        team_name = team_names[i]
+        teams.append(GameTeam(team_name, risk_map, strategy = strategy_class, territories = []))
     num_teams = len(teams)
     i = 0
     territories = risk_map.getTerritories()

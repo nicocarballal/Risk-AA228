@@ -38,6 +38,9 @@ class GameTeam:
     
     def addTerritory(self, territory):
         self.territories.append(territory)
+    
+    def removeTerritory(self, territory):
+        self.territories.remove(territory)
         
     def getContinentsOwned(self):
         return self.continents_owned
@@ -98,7 +101,7 @@ class GameTeam:
                 continue
             neighbors = self.risk_map.getNeighbors(territory)
             for neighbor in neighbors:
-                if self.risk_map.getTeam(neighbor) != self.name:
+                if self.risk_map.getTeam(neighbor).getName() != self.name:
                     possibleAttacks[territory] = neighbor
         return possibleAttacks 
     
@@ -123,6 +126,9 @@ class GameTeam:
         
         return self.simNextMove(next_move[0], next_move[1])
     
+    def hasTeamWon(self):
+        return len(self.getTerritories()) == len(self.getRiskMap().getTerritories())
+    
     def makeMove(self, next_move):
         '''
         Make a move according to next_move 
@@ -132,6 +138,7 @@ class GameTeam:
         
         
         '''
+        print(next_move)
         
         return self.simNextMove(next_move[0], next_move[1])
         
@@ -145,7 +152,7 @@ class GameTeam:
         attacking_territory --> type str - name of attacking territory
         defending_territory --> type str - name of defending territory
         '''
-        
+
         defending_team = self.risk_map.getTeam(defending_territory)
         print("Team {team1} declares attack on Team {team2} from {attacker} to {defender}".format(team1 = self.getName(), team2 = defending_team.getName(), attacker = attacking_territory, defender = defending_territory))
         
@@ -192,5 +199,8 @@ class GameTeam:
             defending_team.addTroops(defending_territory, -prev_defending_troops)
             # Declare the territory to the attacking team! 
             self.risk_map.setTeam(defending_territory, self)
+            # Assign the territory to the attacking team
+            self.addTerritory(defending_territory)
+            defending_team.removeTerritory(defending_territory)
             # Add all but one remaining attacking troops to the territory
             self.addTroops(defending_territory, attacking_troops - 1)
