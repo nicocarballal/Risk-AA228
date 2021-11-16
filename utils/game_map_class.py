@@ -1,14 +1,16 @@
 import networkx as nx
 
 class GameMap:
-    def __init__(self, blocks, edges):
+    def __init__(self, blocks, edges, teams):
         '''Initializes a game map using the following inputs:
                 blocks: a dict that maps from a block name string (such as North America) to a tuple of (the color
                         assigned to that block, a list of block member strings (such as USA)
                 edges: a list of tuples of block member strings that are to be connected
+                teams: a list of teams playing the game
 
            This results in the following member attributes:
                blocks: as described above
+               teams: as described above
                graph: an undirected graph with the following characteristics:
                     nodes: as per nx.Graph
                     Each node has the following attributes:
@@ -17,6 +19,7 @@ class GameMap:
                         num_troops: the number of troops that occupy it
                     edges: as per nx.Graph'''
         self.blocks = blocks
+        self.teams = teams
         self.graph = nx.Graph()
         for b in blocks.keys():
             for node in blocks[b][1]:
