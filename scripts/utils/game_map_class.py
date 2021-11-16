@@ -1,7 +1,7 @@
 import networkx as nx
 
 class GameMap:
-    def __init__(self, blocks, edges, teams):
+    def __init__(self, blocks, edges, teams, curr_team_i, curr_stage):
         '''Initializes a game map using the following inputs:
                 blocks: a dict that maps from a block name string (such as North America) to a tuple of (the color
                         assigned to that block, a list of block member strings (such as USA)
@@ -21,6 +21,8 @@ class GameMap:
                team_color_map: keeps an array of which team owns which node'''
         self.blocks = blocks
         self.teams = teams
+        self.curr_team_i = curr_team_i
+        self.curr_stage = curr_stage
         self.graph = nx.Graph()
         for b in blocks.keys():
             for node in blocks[b][1]:
@@ -32,32 +34,41 @@ class GameMap:
             self.graph.nodes[edge[0]]['neighbors'].append(edge[1])
             self.graph.nodes[edge[1]]['neighbors'].append(edge[0])
 
+    def increment_turn_stage(self):
+        if self.curr_stage == "add_troops":
+            self.curr_stage = "attack"
+        else:
+            self.curr_stage = "add_troops"
+            self.curr_team_i += 1
+            if self.curr_team_i >= len(self.teams):
+                self.curr_team_i = 0
+
     def setTeam(self,node,team):
         self.graph.nodes[node]['team'] = team
-    
+
     def getTeam(self, node):
         return self.graph.nodes[node]['team']
 
     def setNumTroops(self,node,new_num):
         self.graph.nodes[node]['num_troops'] = new_num
-        
+
     def getTroops(self, node):
         return self.graph.nodes[node]['num_troops']
-        
+
     def addTroops(self,node,num_add_troops):
         self.graph.nodes[node]['num_troops'] += num_add_troops
 
     def zeroTroops(self,node,new_num):
         self.graph.nodes[node]['num_troops'] = 0
-    
+
     def getTerritories(self):
         territories_by_continent = [v[1] for v in self.blocks.values()]
         country_list = [country for continent in territories_by_continent for country in continent]
         return country_list
-   
+
     def getNeighbors(self, node):
         return self.graph.nodes[node]['neighbors']
-    
+
     def getTeamColorMap(self):
         territories = self.getTerritories()
         color_map = []
@@ -69,13 +80,3 @@ class GameMap:
             else:
                 color_map.append('green')
         return color_map
-    
-    
-            
-            
-            
-            
-            
-            
-        
-            
