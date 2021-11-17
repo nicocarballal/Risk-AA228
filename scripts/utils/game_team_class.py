@@ -63,6 +63,10 @@ class GameTeam:
         self.troops += troops
         self.risk_map.addTroops(country, troops)
 
+    def setTroops(self, country, troops):
+        self.troops += (troops - self.risk_map.getTroops(country))
+        self.risk_map.setNumTroops(country,troops)
+
     def getStrategy(self):
         '''
         Return your strategy
