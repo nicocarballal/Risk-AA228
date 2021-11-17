@@ -60,6 +60,8 @@ class GameTeam:
         country --> name of country to add troops to
         troops --> number of troops to add (this number can be negative if you want to subtract troops)
         '''
+        if (self.risk_map.getTroops(country)+troops)<0:
+            raise Exception("Resulting number of troops cannot be negative")
         self.troops += troops
         self.risk_map.addTroops(country, troops)
 
@@ -68,8 +70,17 @@ class GameTeam:
         Set a certain number of troops for a given territory and adds the difference
         between this number and the number currently there to your teams numTroops
         '''
+        if troops < 0:
+            raise Exception("cannot have negative number of troops")
         self.troops += (troops - self.risk_map.getTroops(country))
         self.risk_map.setNumTroops(country,troops)
+
+    def moveTroops(self, from_territory, to_territory, numTroops):
+        if from_territory in self.getTerritories and to_territory in self.getTerritories:
+            self.addTroops(from_territory, -numTroops)
+            self.addTroops(to_territory, numTroops)
+        else:
+            raise Exception("Only can moveTroops within your own territory, assign territories first")
 
     def getStrategy(self):
         '''
