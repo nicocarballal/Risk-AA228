@@ -76,7 +76,7 @@ class GameTeam:
         self.risk_map.setNumTroops(country,troops)
 
     def moveTroops(self, from_territory, to_territory, numTroops):
-        if from_territory in self.getTerritories and to_territory in self.getTerritories:
+        if from_territory in self.getTerritories() and to_territory in self.getTerritories():
             self.addTroops(from_territory, -numTroops)
             self.addTroops(to_territory, numTroops)
         else:
