@@ -64,6 +64,10 @@ class GameTeam:
         self.risk_map.addTroops(country, troops)
 
     def setTroops(self, country, troops):
+        '''
+        Set a certain number of troops for a given territory and adds the difference
+        between this number and the number currently there to your teams numTroops
+        '''
         self.troops += (troops - self.risk_map.getTroops(country))
         self.risk_map.setNumTroops(country,troops)
 
