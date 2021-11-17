@@ -20,7 +20,7 @@ def BST_Heuristic(team, risk_map):
         for neighbor in neighbors:
             if risk_map.getTeam(neighbor) != team.getName():
                 BST += risk_map.getTroops(neighbor)
-        BST_dict[territory] = BST_dict/risk_map.getTroops(territory)
+        BST_dict[territory] = BST/risk_map.getTroops(territory)
     return BST_dict
 
 def BSR_Heuristic(team, risk_map):
