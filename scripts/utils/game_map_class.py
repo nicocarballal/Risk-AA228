@@ -1,7 +1,7 @@
 import networkx as nx
 
 class GameMap:
-    def __init__(self, blocks, edges, teams, curr_team_i, curr_stage):
+    def __init__(self, blocks, edges, teams):
         '''Initializes a game map using the following inputs:
                 blocks: a dict that maps from a block name string (such as North America) to a tuple of (the color
                         assigned to that block, a list of block member strings (such as USA)
@@ -21,8 +21,6 @@ class GameMap:
                team_color_map: keeps an array of which team owns which node'''
         self.blocks = blocks
         self.teams = teams
-        self.curr_team_i = curr_team_i
-        self.curr_stage = curr_stage
         self.graph = nx.Graph()
         for b in blocks.keys():
             for node in blocks[b][1]:
