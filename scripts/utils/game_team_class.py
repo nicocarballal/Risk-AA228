@@ -131,6 +131,18 @@ class GameTeam:
                 possibleAttacks[territory] = attacksFromTerritory
         return possibleAttacks
 
+    def playAddTroops(self):
+        '''
+        Play out adding troops according to your strategy_type
+        '''
+        return self.strategy.playAddTroops()
+
+    def playAttacks(self):
+        '''
+        Play out attacks according to your strategy_type
+        '''
+        return self.strategy.playAttacks()
+
     def playTurn(self):
         '''
         Play a turn according to your strategy
