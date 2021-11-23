@@ -1,6 +1,6 @@
-from utils.game_map_class import GameMap
-from utils.game_team_class import GameTeam
-import random 
+from game_map_class import GameMap
+from game_team_class import GameTeam
+import random
 
 def setGameBoardRandom(team_names, risk_map, strategy_classes = [None, None]):
     '''
@@ -8,7 +8,7 @@ def setGameBoardRandom(team_names, risk_map, strategy_classes = [None, None]):
     team_names: Your desired team names
     risk_map: RiskMap
     strategy_class: A specific strategy (i.e. "RandomStrategy")
-    
+
     Output:
     risk_map: Updated RiskMap with territories and troops assigned
     teams: Array of teams in the RiskMap
