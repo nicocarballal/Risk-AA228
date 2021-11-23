@@ -49,6 +49,8 @@ class GameMap:
 
     def getTeam(self, node):
         team_name = self.graph.nodes[node]['team']
+        if team_name == None:
+            return None
         return self.teams[team_name]
 
     def setNumTroops(self,node,new_num):
