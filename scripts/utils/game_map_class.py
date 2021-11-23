@@ -1,7 +1,7 @@
 import networkx as nx
 
 class GameMap:
-    def __init__(self, blocks, edges):
+    def __init__(self, blocks, edges, teams):
         '''Initializes a game map using the following inputs:
                 blocks: a dict that maps from a block name string (such as North America) to a tuple of (the color
                         assigned to that block, a list of block member strings (such as USA)
