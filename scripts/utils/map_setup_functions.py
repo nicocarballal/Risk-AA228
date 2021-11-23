@@ -26,7 +26,7 @@ def setGameBoardRandom(team_names, risk_map, strategy_classes = [None, None]):
     for block in territories:
         teams[i % num_teams].addTerritory(block)
         teams[i % num_teams].addTroops(block, 1)
-        risk_map.setTeam(block, teams[i % num_teams])
+        risk_map.setTeam(block, team_names[i % num_teams])
         i += 1
     return risk_map, teams
 
