@@ -220,7 +220,7 @@ class GameTeam:
             # Delete defending team troops from territory
             defending_team.addTroops(defending_territory, -prev_defending_troops)
             # Declare the territory to the attacking team!
-            self.risk_map.setTeam(defending_territory, self)
+            self.risk_map.setTeam(defending_territory, self.name)
             # Assign the territory to the attacking team
             self.addTerritory(defending_territory)
             defending_team.removeTerritory(defending_territory)
