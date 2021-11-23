@@ -74,7 +74,19 @@ class Strategy:
         '''
         raise Exception('Use subclass of strategy for adding toops')
 
-    def playTurn():
+    def playAddTroops(self):
+        '''
+        Play out adding troops according to your strategy
+        '''
+        raise Exception('Use subclass of strategy for playing turn')
+
+    def playAttacks(self):
+        '''
+        Play out attacks according to your strategy
+        '''
+        raise Exception('Use subclass of strategy for playing turn')
+
+    def playTurn(self):
         '''
         Play out a turn according to your strategy
         '''
@@ -103,9 +115,11 @@ class RandomStrategy(Strategy):
             territory = random.choice(self.game_team.getTerritories())
             self.game_team.addTroops(territory, 1)
             print("Adding {num_troops} to {territory}!".format(num_troops = 1, territory = territory))
-    def playTurn(self):
+
+    def playAddTroops(self):
         self.addTroopsTurn(max(3, len(self.game_team.getTerritories()) // 3))
 
+    def playAttacks(self):
         nextMove = self.getNextMove()
         possibleAttacks = self.game_team.getPossibleAttacks()
         i = 0
@@ -113,6 +127,10 @@ class RandomStrategy(Strategy):
             self.game_team.makeMove(nextMove)
             nextMove = self.getNextMove()
             i += 1
+
+    def playTurn(self):
+        self.playAddTroops()
+        self.playAttacks()
 
 class RuleOfThumbStrategy(Strategy):
     '''
@@ -168,10 +186,10 @@ class RuleOfThumbStrategy(Strategy):
             self.game_team.addTroops(territory[0], num_troops)
             return
 
-
-    def playTurn(self):
+    def playAddTroops(self):
         self.addTroopsTurn(max(3, len(self.game_team.getTerritories()) // 3)) # Default for RISK
 
+    def playAttacks(self):
         nextMove = self.getNextMove()
         possibleAttacks = self.game_team.getPossibleAttacks()
         i = 0
@@ -180,6 +198,11 @@ class RuleOfThumbStrategy(Strategy):
             self.game_team.makeMove(nextMove)
             nextMove = self.getNextMove()
             i += 1
+
+    def playTurn(self):
+        self.playAddTroops()
+        self.playAttacks()
+
 
 
 class LookaheadRolloutStrategy(Strategy):
@@ -209,9 +232,10 @@ class LookaheadRolloutStrategy(Strategy):
             self.game_team.addTroops(territory, 1)
             print("Adding {num_troops} to {territory}!".format(num_troops = 1, territory = territory))
 
-    def playTurn(self):
+    def playAddTroops(self):
         self.addTroopsTurn(max(3, len(self.game_team.getTerritories()) // 3))
 
+    def playAttacks(self):
         nextMove = self.getNextMove()
         possibleAttacks = self.game_team.getPossibleAttacks()
         i = 0
@@ -219,3 +243,7 @@ class LookaheadRolloutStrategy(Strategy):
             self.game_team.makeMove(nextMove)
             nextMove = self.getNextMove()
             i += 1
+
+    def playTurn(self):
+        self.playAddTroops()
+        self.playAttacks()
