@@ -1,5 +1,5 @@
-from game_map_class import GameMap
-from game_team_class import GameTeam
+from utils.game_map_class import GameMap
+from utils.game_team_class import GameTeam
 import random
 
 def setGameBoardRandom(team_names, risk_map, strategy_classes = [None, None]):
