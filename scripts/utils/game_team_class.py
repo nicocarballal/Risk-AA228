@@ -26,9 +26,10 @@ class GameTeam:
         self.cards = cards
         self.risk_map = risk_map
         if strategy == None:
-            self.strategy = Strategy(self)
+            self.strategy = None
         else:
             self.strategy = strategy(self)
+        self.risk_map.teams[team_name] = self
 
     def getName(self):
         return self.name
