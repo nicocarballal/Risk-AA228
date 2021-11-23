@@ -6,7 +6,7 @@ class GameMap:
                 blocks: a dict that maps from a block name string (such as North America) to a tuple of (the color
                         assigned to that block, a list of block member strings (such as USA)
                 edges: a list of tuples of block member strings that are to be connected
-                teams: a list of teams playing the game
+                teams: a dict of team_names to GameTeams playing the game
 
            This results in the following member attributes:
                blocks: as described above
@@ -21,6 +21,7 @@ class GameMap:
                team_color_map: keeps an array of which team owns which node'''
         self.blocks = blocks
         self.graph = nx.Graph()
+        self.teams = teams
         for b in blocks.keys():
             for node in blocks[b][1]:
                 self.graph.add_node(node,block=b,team=None,num_troops=0)
@@ -40,11 +41,15 @@ class GameMap:
             if self.curr_team_i >= len(self.teams):
                 self.curr_team_i = 0
 
-    def setTeam(self,node,team):
-        self.graph.nodes[node]['team'] = team
+    def setTeam(self,node,team_name):
+        """Takes in string for TEAM NAME (not GameTeam itself)"""
+        if team_name not in self.teams:
+            raise Exception("That team name is not corresponded to any team in this GameMap")
+        self.graph.nodes[node]['team'] = team_name
 
     def getTeam(self, node):
-        return self.graph.nodes[node]['team']
+        team_name = self.graph.nodes[node]['team']
+        return self.teams[team_name]
 
     def setNumTroops(self,node,new_num):
         self.graph.nodes[node]['num_troops'] = new_num
