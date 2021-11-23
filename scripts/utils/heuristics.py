@@ -18,7 +18,7 @@ def BST_Heuristic(team, risk_map):
         BST = 0
         neighbors = risk_map.getNeighbors(territory)
         for neighbor in neighbors:
-            if risk_map.getTeam(neighbor) != team.getName():
+            if risk_map.getTeam(neighbor).getName() != team.getName():
                 BST += risk_map.getTroops(neighbor)
         BST_dict[territory] = BST/risk_map.getTroops(territory)
     return BST_dict
@@ -35,7 +35,7 @@ def BSR_Heuristic(team, risk_map):
         BSR_dict: type dictionary { keys --> names of territories; values --> BSR ratings}
     '''
     BSR_dict = BST_Heuristic(team, risk_map)
-    factor=1.0/sum(BSR_dict.itervalues())
+    factor=1.0/sum(BSR_dict.values())
     for country in BSR_dict:
         BSR_dict[country] = BSR_dict[country]*factor
     return BSR_dict
