@@ -183,4 +183,4 @@ def initializeFullRiskMap():
               ("New Guinea","Western Australia"),
               ("New Guinea","Eastern Australia"),
               ("Western Australia","Eastern Australia")]
-    return GameMap(risk_blocks,risk_edges)
+    return GameMap(risk_blocks,risk_edges,{})
