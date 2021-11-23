@@ -39,3 +39,35 @@ def BSR_Heuristic(team, risk_map):
     for country in BSR_dict:
         BSR_dict[country] = BSR_dict[country]*factor
     return BSR_dict
+
+def EdgeWin(team, game_map):
+    """This function takes a game map (i.e. a state) and returns
+    the % equity they have in the game
+
+    This one just calculates proportion of edges it would win"""
+
+    edge_win_dict = {}
+    for team_name in game_map.teams:
+        edge_win_dict[team_name] = 0
+
+    total = 0
+    for e in game_map.graph.edges():
+        nodeA = game_map.graph.nodes[e[0]]
+        nodeB = game_map.graph.nodes[e[1]]
+        if nodeA['team'] or nodeB['team']:
+            total += 1
+            if nodeA['team'] == nodeB['team']:
+                edge_win_dict[nodeA['team']] += 1
+            elif nodeA['team'] == None or nodeA['num_troops'] < nodeB['num_troops']:
+                edge_win_dict[nodeB['team']] += 1
+            elif nodeB['team'] == None or nodeB['num_troops'] < nodeA['num_troops']:
+                edge_win_dict[nodeA['team']] += 1
+            else:
+                total -= 1
+
+    if total == 0:
+        equity = .5
+    else:
+        equity = edge_win_dict[team.getName()]/total
+
+    return equity
