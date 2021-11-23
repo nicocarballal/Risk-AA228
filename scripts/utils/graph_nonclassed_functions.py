@@ -36,3 +36,5 @@ def addTroops(graph,node,num_add_troops):
 
 def zeroTroops(graph,node,new_num):
     graph.nodes[node]['num_troops'] = 0
+
+
