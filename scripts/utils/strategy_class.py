@@ -1,7 +1,8 @@
 from utils.game_team_class import GameTeam
 import random
 import copy
-import utils.lookahead_rollouts as lr
+import utils.lookahead_rollouts_attack as lrattack
+import utils.lookahead_rollouts_add as lradd
 
 class Strategy:
     '''
@@ -223,12 +224,21 @@ class LookaheadRolloutStrategy(Strategy):
                 ro_opponent = ro_map.teams[team_name]
         ro_my_team.setStrategy(RandomStrategy)
         ro_opponent.setStrategy(RuleOfThumbStrategy)
-        next_move = lr.rollout_lookahead(ro_my_team,ro_map,30,.95)
+        next_move = lrattack.rollout_lookahead(ro_my_team,ro_map,30,.95)
         return next_move
 
     def addTroopsTurn(self, num_troops):
         for _ in range(num_troops):
-            territory = random.choice(self.game_team.getTerritories())
+            my_team_name = self.game_team.name
+            ro_map = copy.deepcopy(self.game_team.risk_map)
+            for team_name in ro_map.teams:
+                if team_name == my_team_name:
+                    ro_my_team = ro_map.teams[team_name]
+                else:
+                    ro_opponent = ro_map.teams[team_name]
+            ro_my_team.setStrategy(RandomStrategy)
+            ro_opponent.setStrategy(RuleOfThumbStrategy)
+            territory = lradd.rollout_lookahead(ro_my_team,ro_opponent,ro_map,30,.95)
             self.game_team.addTroops(territory, 1)
             print("Adding {num_troops} to {territory}!".format(num_troops = 1, territory = territory))
 
