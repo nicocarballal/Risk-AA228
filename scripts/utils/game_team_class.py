@@ -31,6 +31,9 @@ class GameTeam:
             self.strategy = strategy(self)
         self.risk_map.teams[team_name] = self
 
+    def setStrategy(self,strategy_class):
+        self.strategy = strategy_class(self)
+
     def getName(self):
         return self.name
 
