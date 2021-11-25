@@ -67,7 +67,7 @@ class Strategy:
         '''
         raise Exception('Use subclass of strategy for getting next move')
 
-    def addTroopsTurn(self, num_troops):
+    def addTroopsTurn(self, num_troops, print_ = False):
         '''
         Adds troops according to your policy's strategy!
         Inputs:
@@ -75,13 +75,13 @@ class Strategy:
         '''
         raise Exception('Use subclass of strategy for adding toops')
 
-    def playAddTroops(self):
+    def playAddTroops(self, print_ = False):
         '''
         Play out adding troops according to your strategy
         '''
         raise Exception('Use subclass of strategy for playing turn')
 
-    def playAttacks(self):
+    def playAttacks(self, print_ = False):
         '''
         Play out attacks according to your strategy
         '''
@@ -108,30 +108,30 @@ class RandomStrategy(Strategy):
         if len(possibleAttacks) == 0:
             return None
         attackingTerritoryPossibleAttacks = random.choice(list(possibleAttacks.items()))
-        print(attackingTerritoryPossibleAttacks)
         return (attackingTerritoryPossibleAttacks[0], random.choice(attackingTerritoryPossibleAttacks[1]))
 
-    def addTroopsTurn(self, num_troops):
+    def addTroopsTurn(self, num_troops, print_ = False):
         for _ in range(num_troops):
             territory = random.choice(self.game_team.getTerritories())
             self.game_team.addTroops(territory, 1)
-            print("Adding {num_troops} to {territory}!".format(num_troops = 1, territory = territory))
+            if print_:       
+                print("Adding {num_troops} to {territory}!".format(num_troops = 1, territory = territory))
 
-    def playAddTroops(self):
-        self.addTroopsTurn(max(3, len(self.game_team.getTerritories()) // 3))
+    def playAddTroops(self, print_ = False):
+        self.addTroopsTurn(max(3, len(self.game_team.getTerritories()) // 3), print_ = print_)
 
-    def playAttacks(self):
+    def playAttacks(self, print_ = False):
         nextMove = self.getNextMove()
         possibleAttacks = self.game_team.getPossibleAttacks()
         i = 0
         while nextMove != None and i <= len(possibleAttacks)/2:
-            self.game_team.makeMove(nextMove)
+            self.game_team.makeMove(nextMove, print_ = print_)
             nextMove = self.getNextMove()
             i += 1
 
-    def playTurn(self):
-        self.playAddTroops()
-        self.playAttacks()
+    def playTurn(self, print_ = False):
+        self.playAddTroops(print_ = print_)
+        self.playAttacks(print_ = print_)
 
 class RuleOfThumbStrategy(Strategy):
     '''
@@ -162,7 +162,7 @@ class RuleOfThumbStrategy(Strategy):
         return (best_attack, best_defense)
 
 
-    def addTroopsTurn(self, num_troops):
+    def addTroopsTurn(self, num_troops, print_ = False):
         possibleAttacks = self.getPossibleAttacks()
         neighborDict = {key: len(value) for key, value in possibleAttacks.items()}
         most_neighbors = list({k: v for k, v in sorted(neighborDict.items(), key=lambda item: item[1], reverse = True)}.items())
@@ -178,31 +178,33 @@ class RuleOfThumbStrategy(Strategy):
                 territories_to_neighbors_dict[territory] = n
             territory = list({k: v for k, v in sorted(territories_to_neighbors_dict.items(), key=lambda item: item[1], reverse = True)}.items())
             territory = territory[0]
-            print("Adding {num_troops} to {territory}!".format(num_troops = num_troops, territory = territory[0]))
+            if print_:
+                print("Adding {num_troops} to {territory}!".format(num_troops = num_troops, territory = territory[0]))
             self.game_team.addTroops(territory[0], num_troops)
             return
         else:
             territory = most_neighbors[0]
-            print("Adding {num_troops} to {territory}!".format(num_troops = num_troops, territory = territory[0]))
+            if print_:
+                print("Adding {num_troops} to {territory}!".format(num_troops = num_troops, territory = territory[0]))
             self.game_team.addTroops(territory[0], num_troops)
             return
 
-    def playAddTroops(self):
-        self.addTroopsTurn(max(3, len(self.game_team.getTerritories()) // 3)) # Default for RISK
+    def playAddTroops(self, print_ = False):
+        self.addTroopsTurn(max(3, len(self.game_team.getTerritories()) // 3), print_ = print_) # Default for RISK
 
-    def playAttacks(self):
+    def playAttacks(self, print_ = False):
         nextMove = self.getNextMove()
         possibleAttacks = self.game_team.getPossibleAttacks()
         i = 0
 
         while nextMove != None:
-            self.game_team.makeMove(nextMove)
+            self.game_team.makeMove(nextMove, print_ = print_)
             nextMove = self.getNextMove()
             i += 1
 
-    def playTurn(self):
-        self.playAddTroops()
-        self.playAttacks()
+    def playTurn(self, print_ = False):
+        self.playAddTroops(print_ = print_)
+        self.playAttacks(print_ = print_)
 
 
 
@@ -227,7 +229,7 @@ class LookaheadRolloutStrategy(Strategy):
         next_move = lrattack.rollout_lookahead(ro_my_team,ro_map,30,.95)
         return next_move
 
-    def addTroopsTurn(self, num_troops):
+    def addTroopsTurn(self, num_troops, print_ = False):
         for _ in range(num_troops):
             my_team_name = self.game_team.name
             ro_map = copy.deepcopy(self.game_team.risk_map)
@@ -240,20 +242,21 @@ class LookaheadRolloutStrategy(Strategy):
             ro_opponent.setStrategy(RuleOfThumbStrategy)
             territory = lradd.rollout_lookahead(ro_my_team,ro_opponent,ro_map,30,.95)
             self.game_team.addTroops(territory, 1)
-            print("Adding {num_troops} to {territory}!".format(num_troops = 1, territory = territory))
+            if print_ == True:
+                print("Adding {num_troops} to {territory}!".format(num_troops = 1, territory = territory))
 
-    def playAddTroops(self):
-        self.addTroopsTurn(max(3, len(self.game_team.getTerritories()) // 3))
+    def playAddTroops(self, print_ = False):
+        self.addTroopsTurn(max(3, len(self.game_team.getTerritories()) // 3), print_ = print_)
 
-    def playAttacks(self):
+    def playAttacks(self, print_ = False):
         nextMove = self.getNextMove()
         possibleAttacks = self.game_team.getPossibleAttacks()
         i = 0
         while nextMove != None and i <= len(possibleAttacks)/2:
-            self.game_team.makeMove(nextMove)
+            self.game_team.makeMove(nextMove, print_ = print_)
             nextMove = self.getNextMove()
             i += 1
 
-    def playTurn(self):
-        self.playAddTroops()
-        self.playAttacks()
+    def playTurn(self, print_ = False):
+        self.playAddTroops(print_ = print_)
+        self.playAttacks(print_ = print_)

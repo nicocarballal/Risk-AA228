@@ -2,7 +2,7 @@ from utils.game_map_class import GameMap
 from utils.game_team_class import GameTeam
 #from utils.strategy_class import Strategy, RandomStrategy, RuleOfThumbStrategy
 from utils.map_setup_functions import setGameBoardRandom, initializeFullRiskMap
-from utils.heuristics import BST_Heuristic, EdgeWin
+from utils.heuristics import BST_Heuristic, EdgeWin, Countries_Heuristic
 
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -13,18 +13,20 @@ def rollout_lookahead(team,riskMap,d,discount):
     '''Returns the best action according to lookahead with rollouts'''
     return greedy(team,riskMap,d,discount)[0]
 
-def greedy(team,riskMap,d,discount):
+def greedy(team,riskMap,d,discount, print_ = False):
     '''Greedily looks through all possible actions and determines the value of each from the current state
     using lookahead with rollouts. Returns action with maximum value and the value itself'''
     possible_attackers = team.getPossibleAttacks()
-    print(possible_attackers)
+    if print_:
+        print("Possible Attackers:", possible_attackers)
     lookahead_list = []
     for attacker in possible_attackers:
         for defender in possible_attackers[attacker]:
             action = (attacker,defender)
             u = lookahead(discount,riskMap,action,d)
             lookahead_list.append((action,u))
-    print(lookahead_list)
+    if print_:
+        print("Lookahead List:", lookahead_list)
     if len(lookahead_list) == 0:
         return (None,None)
     return max(lookahead_list, key = lambda x: x[1])
@@ -140,5 +142,6 @@ def rollout(discount,sp,d,my_team,opponent):
         #BST_my_team_sum = sum(list(BST_Heuristic(my_team,sp).values()))
         #BST_opponent_sum = sum(list(BST_Heuristic(opponent,sp).values()))
         #r = 100*BST_opponent_sum/(BST_my_team_sum+BST_opponent_sum)
-        r = 100*EdgeWin(my_team,sp)
+        #r = 100*EdgeWin(my_team,sp)
+        r = 100 * Countries_Heuristic(my_team, sp)
         return (discount**(d-1))*r

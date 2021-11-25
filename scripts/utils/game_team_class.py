@@ -131,11 +131,11 @@ class GameTeam:
                 possibleAttacks[territory] = attacksFromTerritory
         return possibleAttacks
 
-    def playAddTroops(self):
+    def playAddTroops(self, print_ = False):
         '''
         Play out adding troops according to your strategy_type
         '''
-        return self.strategy.playAddTroops()
+        return self.strategy.playAddTroops(print_ = print_)
 
     def playAttacks(self):
         '''
@@ -143,17 +143,17 @@ class GameTeam:
         '''
         return self.strategy.playAttacks()
 
-    def playTurn(self):
+    def playTurn(self, print_ = False):
         '''
         Play a turn according to your strategy
         '''
-        return self.strategy.playTurn()
+        return self.strategy.playTurn(print_ = print_)
 
     def getNextMove(self):
         return self.strategy.getNextMove()
 
 
-    def determineAndMakeMove(self):
+    def determineAndMakeMove(self, print_ = False):
         '''
         Make a move according to your strategy
         '''
@@ -162,12 +162,12 @@ class GameTeam:
         if next_move == None:
             return
 
-        return self.simNextMove(next_move[0], next_move[1])
+        return self.simNextMove(next_move[0], next_move[1], print_ = print_)
 
     def hasTeamWon(self):
         return len(self.getTerritories()) == len(self.getRiskMap().getTerritories())
 
-    def makeMove(self, next_move):
+    def makeMove(self, next_move, print_ = False):
         '''
         Make a move according to next_move
 
@@ -176,13 +176,11 @@ class GameTeam:
 
 
         '''
-        print(next_move)
-
-        return self.simNextMove(next_move[0], next_move[1])
+        return self.simNextMove(next_move[0], next_move[1], print_ = print_)
 
 
 
-    def simNextMove(self, attacking_territory, defending_territory):
+    def simNextMove(self, attacking_territory, defending_territory, print_ = False):
         '''
         Simulate the next move from the attacking territory to the defending territory
 
@@ -192,7 +190,8 @@ class GameTeam:
         '''
 
         defending_team = self.risk_map.getTeam(defending_territory)
-        print("Team {team1} declares attack on Team {team2} from {attacker} to {defender}".format(team1 = self.getName(), team2 = defending_team.getName(), attacker = attacking_territory, defender = defending_territory))
+        if print_:
+            print("Team {team1} declares attack on Team {team2} from {attacker} to {defender}".format(team1 = self.getName(), team2 = defending_team.getName(), attacker = attacking_territory, defender = defending_territory))
 
         attacking_troops = self.risk_map.getTroops(attacking_territory)
         defending_troops = self.risk_map.getTroops(defending_territory)
@@ -220,12 +219,13 @@ class GameTeam:
 
             attacking_troops -= defending_win
             defending_troops -= attacking_win
-
-            print("Attacking_dice: ", attacking_dice)
-            print("Defending_dice: ", defending_dice)
-            print(results)
-            print("Attacking Troops Left: ", attacking_troops)
-            print("Defending Troops Left: ", defending_troops)
+            
+            if print_:
+                print("Attacking_dice: ", attacking_dice)
+                print("Defending_dice: ", defending_dice)
+                print(results)
+                print("Attacking Troops Left: ", attacking_troops)
+                print("Defending Troops Left: ", defending_troops)
         # Attacking territory will always remain with 1 troop in this setup since they will always
         # move all of their troops but 1 in this set-up or they will lose all but 1 of their troops
         self.risk_map.setNumTroops(attacking_territory, 1)

@@ -13,17 +13,19 @@ def rollout_lookahead(team,opponent,riskMap,d,discount):
     '''Returns the best action according to lookahead with rollouts'''
     return greedy(team,opponent,riskMap,d,discount)[0]
 
-def greedy(team,opponent,riskMap,d,discount):
+def greedy(team,opponent,riskMap,d,discount, print_ = False):
     '''Greedily looks through all possible actions and determines the value of each from the current state
     using lookahead with rollouts. Returns action with maximum value and the value itself'''
     possible_destinations = team.getTerritories()
-    print(possible_destinations)
+    if print_:
+        print("Possible Destinations:", possible_destinations)
     lookahead_list = []
     for dest in possible_destinations:
         action = dest
         u = lookahead(discount,riskMap,action,d,team.name,opponent.name)
         lookahead_list.append((action,u))
-    print(lookahead_list)
+    if print_:
+        print("Lookahead List:", lookahead_list)
     if len(lookahead_list) == 0:
         return (None,None)
     return max(lookahead_list, key = lambda x: x[1])

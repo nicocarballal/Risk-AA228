@@ -40,6 +40,9 @@ def BSR_Heuristic(team, risk_map):
         BSR_dict[country] = BSR_dict[country]*factor
     return BSR_dict
 
+def Countries_Heuristic(team, risk_map):
+    return len(team.getTerritories())
+
 def EdgeWin(team, game_map):
     """This function takes a game map (i.e. a state) and returns
     the % equity they have in the game
