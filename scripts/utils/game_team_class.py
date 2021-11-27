@@ -137,20 +137,20 @@ class GameTeam:
         '''
         return self.strategy.playAddTroops(print_ = print_)
 
-    def playAttacks(self):
+    def playAttacks(self, print_ = False):
         '''
         Play out attacks according to your strategy_type
         '''
-        return self.strategy.playAttacks()
+        return self.strategy.playAttacks(print_ = print_)
 
-    def playTurn(self, print_ = False):
+    def playTurn(self, print_ = False, depth_ = 1):
         '''
         Play a turn according to your strategy
         '''
-        return self.strategy.playTurn(print_ = print_)
+        return self.strategy.playTurn(print_ = print_, depth_ = depth_)
 
-    def getNextMove(self):
-        return self.strategy.getNextMove()
+    def getNextMove(self, print_ = False, depth_ = False):
+        return self.strategy.getNextMove(print_ = print_, depth_ = depth_)
 
 
     def determineAndMakeMove(self, print_ = False):
