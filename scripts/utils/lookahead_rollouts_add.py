@@ -9,11 +9,11 @@ import matplotlib.pyplot as plt
 
 import copy
 
-def rollout_lookahead(team,opponent,riskMap,d,discount, print_ = False):
+def rollout_lookahead(team,opponent,riskMap,d,discount, num_troops = 1, print_ = False):
     '''Returns the best action according to lookahead with rollouts'''
-    return greedy(team,opponent,riskMap,d,discount, print_ = print_)[0]
+    return greedy(team,opponent,riskMap,d,discount, num_troops = num_troops, print_ = print_)[0]
 
-def greedy(team,opponent,riskMap,d,discount, print_ = False):
+def greedy(team,opponent,riskMap,d,discount, num_troops = 1, print_ = False):
     '''Greedily looks through all possible actions and determines the value of each from the current state
     using lookahead with rollouts. Returns action with maximum value and the value itself'''
     possible_destinations = team.getTerritories()
@@ -24,7 +24,7 @@ def greedy(team,opponent,riskMap,d,discount, print_ = False):
     for dest in possible_destinations:
         #print("Try adding 1 troop to {dest}".format(dest = dest))
         action = dest
-        u = lookahead(discount,riskMap,action,d,team.name,opponent.name, print_ = print_)
+        u = lookahead(discount,riskMap,action,d,team.name,opponent.name, num_troops = num_troops, print_ = print_)
         lookahead_list.append((action,u))
     if print_:
         print("Lookahead List:", lookahead_list)
@@ -32,7 +32,7 @@ def greedy(team,opponent,riskMap,d,discount, print_ = False):
         return (None,None)
     return max(lookahead_list, key = lambda x: x[1])
 
-def lookahead(discount,riskMap,action,d,team_name,opponent_name, print_ = False):
+def lookahead(discount,riskMap,action,d,team_name,opponent_name, num_troops = 1, print_ = False):
     ''' Computes successor states and probabilities of these successor states given the current riskMap
 
     Then for each of these successor states performs a rollout to get a value that that successor state and
@@ -48,7 +48,7 @@ def lookahead(discount,riskMap,action,d,team_name,opponent_name, print_ = False)
     my_team = sp.teams[team_name]
     opponent = sp.teams[opponent_name]
     
-    my_team.addTroops(action,1)
+    my_team.addTroops(action, num_troops)
 
     sum_successors = 1*rollout(discount,sp,d,my_team,opponent, print_ = print_)
 

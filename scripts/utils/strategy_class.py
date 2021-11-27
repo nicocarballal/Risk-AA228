@@ -230,20 +230,20 @@ class LookaheadRolloutStrategy(Strategy):
         return next_move
 
     def addTroopsTurn(self, num_troops, print_ = False, depth_ = 1):
-        for _ in range(num_troops):
-            my_team_name = self.game_team.name
-            ro_map = copy.deepcopy(self.game_team.risk_map)
-            for team_name in ro_map.teams:
-                if team_name == my_team_name:
-                    ro_my_team = ro_map.teams[team_name]
-                else:
-                    ro_opponent = ro_map.teams[team_name]
-            ro_my_team.setStrategy(RandomStrategy)
-            ro_opponent.setStrategy(RuleOfThumbStrategy)
-            territory = lradd.rollout_lookahead(ro_my_team,ro_opponent,ro_map,depth_,.95, print_ = print_)
-            self.game_team.addTroops(territory, 1)
-            
-            print("Adding {num_troops} officially to {territory}!".format(num_troops = 1, territory = territory))
+        
+        my_team_name = self.game_team.name
+        ro_map = copy.deepcopy(self.game_team.risk_map)
+        for team_name in ro_map.teams:
+            if team_name == my_team_name:
+                ro_my_team = ro_map.teams[team_name]
+            else:
+                ro_opponent = ro_map.teams[team_name]
+        ro_my_team.setStrategy(RuleOfThumbStrategy)
+        ro_opponent.setStrategy(RuleOfThumbStrategy)
+        territory = lradd.rollout_lookahead(ro_my_team,ro_opponent,ro_map,depth_,.95, num_troops = num_troops, print_ = print_)
+        self.game_team.addTroops(territory, num_troops)
+
+        print("Adding {num_troops} officially to {territory}!".format(num_troops = num_troops, territory = territory))
 
     def playAddTroops(self, print_ = False, depth_ = 1):
         self.addTroopsTurn(max(3, len(self.game_team.getTerritories()) // 3), print_ = print_, depth_ = depth_)
