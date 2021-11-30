@@ -107,10 +107,15 @@ class GameTeam:
     def getRiskMap(self):
         return self.risk_map
 
-    def getPossibleAttacks(self):
+    def getPossibleAttacks(self, attack_condition = 1):
         '''
         This same function is in Strategy Class as well (will probably want to delete
         one at some point)
+        
+        Inputs:
+        - attack_condition: most of the time you don't want to consider attacks if you only have one troo
+        however if you are considering adding troops, you might want to cahnge attack condition to 0 so that
+        you can consider adding troops to territory, then attackings
 
 
         Outputs:
@@ -120,7 +125,7 @@ class GameTeam:
         '''
         possibleAttacks = {}
         for territory in self.territories:
-            if self.risk_map.getTroops(territory) == 1:
+            if self.risk_map.getTroops(territory) == attack_condition:
                 continue
             neighbors = self.risk_map.getNeighbors(territory)
             attacksFromTerritory = []
@@ -176,6 +181,10 @@ class GameTeam:
 
 
         '''
+        if next_move[0] is None:
+            print("Team {team1} stops attacking".format(team1 = self.getName()))
+            return
+               
         return self.simNextMove(next_move[0], next_move[1], print_ = print_)
 
 

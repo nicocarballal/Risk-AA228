@@ -43,6 +43,8 @@ def BSR_Heuristic(team, risk_map):
 def Countries_Heuristic(team, risk_map):
     return len(team.getTerritories())
 
+def Troops_Heuritic(team, risk_map):
+    return self.team.getTroops()
 def EdgeWin(team, game_map):
     """This function takes a game map (i.e. a state) and returns
     the % equity they have in the game

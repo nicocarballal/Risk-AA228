@@ -159,6 +159,8 @@ class RuleOfThumbStrategy(Strategy):
                     best_diff = troop_diff
         if best_diff <= 0:
             return None
+        if print_:
+            print("Team {name} officially attacking from {attack} to {defend}!".format(name = self.game_team.getName(), attack = best_attack, defend = best_defense))
         return (best_attack, best_defense)
 
 
@@ -226,7 +228,9 @@ class LookaheadRolloutStrategy(Strategy):
                 ro_opponent = ro_map.teams[team_name]
         ro_my_team.setStrategy(RuleOfThumbStrategy)
         ro_opponent.setStrategy(RuleOfThumbStrategy)
-        next_move = lrattack.rollout_lookahead(ro_my_team,ro_map,depth_,.95, print_ = print_)
+        next_move = lrattack.rollout_lookahead(ro_my_team,ro_map,depth_,.75, print_ = print_)
+        ro_my_team.setStrategy(LookaheadRolloutStrategy)
+        print("Team {name} officially attacking from {attack} to {defend}!".format(name = self.game_team.getName(), attack = next_move[0], defend = next_move[1]))
         return next_move
 
     def addTroopsTurn(self, num_troops, print_ = False, depth_ = 1):
@@ -240,7 +244,8 @@ class LookaheadRolloutStrategy(Strategy):
                 ro_opponent = ro_map.teams[team_name]
         ro_my_team.setStrategy(RuleOfThumbStrategy)
         ro_opponent.setStrategy(RuleOfThumbStrategy)
-        territory = lradd.rollout_lookahead(ro_my_team,ro_opponent,ro_map,depth_,.95, num_troops = num_troops, print_ = print_)
+        territory = lradd.rollout_lookahead(ro_my_team,ro_opponent,ro_map,depth_,.75, num_troops = num_troops, print_ = print_)
+        ro_my_team.setStrategy(LookaheadRolloutStrategy)
         self.game_team.addTroops(territory, num_troops)
 
         print("Adding {num_troops} officially to {territory}!".format(num_troops = num_troops, territory = territory))
@@ -252,10 +257,10 @@ class LookaheadRolloutStrategy(Strategy):
         nextMove = self.getNextMove(print_ = print_, depth_ = depth_)
         possibleAttacks = self.game_team.getPossibleAttacks()
         i = 0
-        while nextMove != None:
+        while nextMove != None and nextMove != (None, None):
             print("Attack: ", nextMove)
             self.game_team.makeMove(nextMove, print_ = True)
-            nextMove = self.getNextMove()
+            nextMove = self.getNextMove(print_ = print_, depth_ = depth_)
             i += 1
 
     def playTurn(self, print_ = False, depth_ = 1):

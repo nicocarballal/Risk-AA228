@@ -16,8 +16,7 @@ def rollout_lookahead(team,opponent,riskMap,d,discount, num_troops = 1, print_ =
 def greedy(team,opponent,riskMap,d,discount, num_troops = 1, print_ = False):
     '''Greedily looks through all possible actions and determines the value of each from the current state
     using lookahead with rollouts. Returns action with maximum value and the value itself'''
-    possible_destinations = team.getTerritories()
-
+    possible_destinations = team.getPossibleAttacks(attack_condition = 0).keys()
     if print_:
         print("Possible Destinations:", possible_destinations)
     lookahead_list = []
@@ -40,17 +39,20 @@ def lookahead(discount,riskMap,action,d,team_name,opponent_name, num_troops = 1,
     by the discount factor to return the value of that function.
     '''
     # There's only one successor state with 100% likelihood
+    sum_successors = 0
+    trials = 5
+    for trial in range(trials):
+        # Sets up successor state
+        sp = copy.deepcopy(riskMap)
+        # Doing a deepcopy of the riskMap also makes copies of the GameTeams stored within the map in riskMap.teams
+        # so we don't have to make another copy
+        my_team = sp.teams[team_name]
+        opponent = sp.teams[opponent_name]
 
-    # Sets up successor state
-    sp = copy.deepcopy(riskMap)
-    # Doing a deepcopy of the riskMap also makes copies of the GameTeams stored within the map in riskMap.teams
-    # so we don't have to make another copy
-    my_team = sp.teams[team_name]
-    opponent = sp.teams[opponent_name]
-    
-    my_team.addTroops(action, num_troops)
 
-    sum_successors = 1*rollout(discount,sp,d,my_team,opponent, print_ = print_)
+        my_team.addTroops(action, num_troops)
+
+        sum_successors += 1/trials*rollout(discount,sp,d,my_team,opponent, print_ = print_)
 
     return discount*sum_successors
 
@@ -85,4 +87,6 @@ def rollout(discount,sp,d,my_team,opponent, print_ = False):
         #BST_opponent_sum = sum(list(BST_Heuristic(opponent,sp).values()))
         #r = 100*BST_opponent_sum/(BST_my_team_sum+BST_opponent_sum)
         r = 100*EdgeWin(my_team,sp)
+        if print_:
+            print("Rollout Reward: ", (discount**(d-1))*r)
         return (discount**(d-1))*r
