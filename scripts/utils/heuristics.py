@@ -76,3 +76,42 @@ def EdgeWin(team, game_map):
         equity = edge_win_dict[team.getName()]/total
 
     return equity
+
+def EdgeDiff(team, game_map):
+    """This function takes a game map (i.e. a state) and returns
+    the % equity they have in the game
+
+    This one just calculates the difference in troops at each edge
+    and gives added reward for same team edges"""
+
+    edge_win_dict = {}
+    for team_name in game_map.teams:
+        edge_win_dict[team_name] = 0
+
+    total = 0
+    for e in game_map.graph.edges():
+        nodeA = game_map.graph.nodes[e[0]]
+        nodeB = game_map.graph.nodes[e[1]]
+        if nodeA['team'] or nodeB['team']:
+            if nodeA['team'] == nodeB['team']:
+                edge_win_dict[nodeA['team']] += 5
+                total += 5
+            elif nodeA['team'] == None:
+                edge_win_dict[nodeB['team']] += nodeB['num_troops']
+                total += nodeB['num_troops']
+            elif nodeA['num_troops'] < nodeB['num_troops']:
+                edge_win_dict[nodeB['team']] += (nodeB['num_troops']-nodeA['num_troops'])
+                total += (nodeB['num_troops']-nodeA['num_troops'])
+            elif nodeB['team'] == None:
+                edge_win_dict[nodeA['team']] += nodeA['num_troops']
+                total += nodeA['num_troops']
+            elif nodeB['num_troops'] < nodeA['num_troops']:
+                edge_win_dict[nodeA['team']] += (nodeA['num_troops']-nodeB['num_troops'])
+                total += (nodeA['num_troops']-nodeB['num_troops'])
+
+    if total == 0:
+        equity = .5
+    else:
+        equity = edge_win_dict[team.getName()]/total
+
+    return equity
