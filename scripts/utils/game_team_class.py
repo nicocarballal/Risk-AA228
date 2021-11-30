@@ -107,10 +107,15 @@ class GameTeam:
     def getRiskMap(self):
         return self.risk_map
 
-    def getPossibleAttacks(self):
+    def getPossibleAttacks(self, attack_condition = 1):
         '''
         This same function is in Strategy Class as well (will probably want to delete
         one at some point)
+        
+        Inputs:
+        - attack_condition: most of the time you don't want to consider attacks if you only have one troo
+        however if you are considering adding troops, you might want to cahnge attack condition to 0 so that
+        you can consider adding troops to territory, then attackings
 
 
         Outputs:
@@ -120,7 +125,7 @@ class GameTeam:
         '''
         possibleAttacks = {}
         for territory in self.territories:
-            if self.risk_map.getTroops(territory) == 1:
+            if self.risk_map.getTroops(territory) == attack_condition:
                 continue
             neighbors = self.risk_map.getNeighbors(territory)
             attacksFromTerritory = []
@@ -137,20 +142,20 @@ class GameTeam:
         '''
         return self.strategy.playAddTroops(print_ = print_)
 
-    def playAttacks(self):
+    def playAttacks(self, print_ = False):
         '''
         Play out attacks according to your strategy_type
         '''
-        return self.strategy.playAttacks()
+        return self.strategy.playAttacks(print_ = print_)
 
-    def playTurn(self, print_ = False):
+    def playTurn(self, print_ = False, depth_ = 1):
         '''
         Play a turn according to your strategy
         '''
-        return self.strategy.playTurn(print_ = print_)
+        return self.strategy.playTurn(print_ = print_, depth_ = depth_)
 
-    def getNextMove(self):
-        return self.strategy.getNextMove()
+    def getNextMove(self, print_ = False, depth_ = False):
+        return self.strategy.getNextMove(print_ = print_, depth_ = depth_)
 
 
     def determineAndMakeMove(self, print_ = False):
@@ -176,6 +181,10 @@ class GameTeam:
 
 
         '''
+        if next_move[0] is None:
+            print("Team {team1} stops attacking".format(team1 = self.getName()))
+            return
+               
         return self.simNextMove(next_move[0], next_move[1], print_ = print_)
 
 
