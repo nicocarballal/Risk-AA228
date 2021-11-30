@@ -3,6 +3,7 @@ import random
 import copy
 import utils.lookahead_rollouts_attack as lrattack
 import utils.lookahead_rollouts_add as lradd
+import utils.MCTS as mcts
 
 class Strategy:
     '''
@@ -260,3 +261,53 @@ class LookaheadRolloutStrategy(Strategy):
     def playTurn(self, print_ = False):
         self.playAddTroops(print_ = print_)
         self.playAttacks(print_ = print_)
+        
+class MonteCarloTreeSearchStrategy(Strategy):
+    '''
+    This strategy uses MCTS to pick the best possible moves. Assumes play against one opponent.
+    '''
+    def __init__(self, game_team):
+        super().__init__(game_team)
+        
+    def getNextMove(self, print_ = True):
+        team_name = self.game_team.name
+        risk_map = copy.deepcopy(self.game_team.risk_map)
+        for name in risk_map.teams:
+            if name != team_name:
+                opponent = risk_map.teams[name]
+        opponent.setStrategy(RandomStrategy)
+        action = mcts.monteCarloTreeSearch(risk_map, team_name, 'attack', 100, 30, 0.95, 1000)
+        if print_ == True and action != None:
+            print('attacking ' + action[1] + ' from ' + action[0])
+        return action
+    
+    def addTroopsTurn(self, num_troops, print_ = True):
+        team_name = self.game_team.name
+        risk_map = copy.deepcopy(self.game_team.risk_map)
+        for name in risk_map.teams:
+            if name != team_name:
+                opponent = risk_map.teams[name]
+        opponent.setStrategy(RandomStrategy)
+        action = mcts.monteCarloTreeSearch(risk_map, team_name, 'add', 100, 30, 0.95, 1000)
+        if print_ == True:
+            print('adding ' + num_troops + ' troops to ' + action) 
+        return action
+    
+    def playAddTroops(self, print_ = True):
+        self.addTroopsTurn(max(3, len(self.game_team.getTerritories()) // 3), print_ = print_)
+    
+    def playAttacks(self, print_ = True):
+        nextMove = self.getNextMove()
+        possibleAttacks = self.game_team.getPossibleAttacks()
+        i = 0
+        while nextMove != None:
+            self.game_team.makeMove(nextMove, print_ = print_)
+            nextMove = self.getNextMove()
+            i += 1
+    
+    def playTurn(self, print_ = True):
+        self.playAddTroops(print_ = print_)
+        self.playAttacks(print_ = print_)
+    
+    
+        
