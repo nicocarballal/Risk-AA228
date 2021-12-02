@@ -88,9 +88,9 @@ def simulate(risk_map, team_name, action_type, N, Q, c, depth, discount):
         if name != team_name:
             opponent = risk_map.teams[name]
     if risk_map.teams[team_name].hasTeamWon():
-        return 100 # not sure about this value
+        return 10000 # not sure about this value
     if opponent.hasTeamWon():
-        return -1 # not sure about this value
+        return -10000 # not sure about this value
     if depth <= 0:
         return getValue(risk_map, team_name) # or can use rollout?
     if (risk_map, getActions(risk_map, team_name, action_type)[0]) not in N: 

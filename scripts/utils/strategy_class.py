@@ -269,7 +269,7 @@ class MonteCarloTreeSearchStrategy(Strategy):
     def __init__(self, game_team):
         super().__init__(game_team)
         
-    def getNextMove(self, print_ = True):
+    def getNextMove(self, print_ = False):
         team_name = self.game_team.name
         risk_map = copy.deepcopy(self.game_team.risk_map)
         for name in risk_map.teams:
@@ -281,7 +281,7 @@ class MonteCarloTreeSearchStrategy(Strategy):
             print('attacking ' + action[1] + ' from ' + action[0])
         return action
     
-    def addTroopsTurn(self, num_troops, print_ = True):
+    def addTroopsTurn(self, num_troops, print_ = False):
         team_name = self.game_team.name
         risk_map = copy.deepcopy(self.game_team.risk_map)
         for name in risk_map.teams:
@@ -289,14 +289,15 @@ class MonteCarloTreeSearchStrategy(Strategy):
                 opponent = risk_map.teams[name]
         opponent.setStrategy(RandomStrategy)
         action = mcts.monteCarloTreeSearch(risk_map, team_name, 'add', 100, 30, 0.95, 1000)
+        self.game_team.addTroops(action, num_troops)
         if print_ == True:
             print('adding ' + num_troops + ' troops to ' + action) 
         return action
     
-    def playAddTroops(self, print_ = True):
+    def playAddTroops(self, print_ = False):
         self.addTroopsTurn(max(3, len(self.game_team.getTerritories()) // 3), print_ = print_)
     
-    def playAttacks(self, print_ = True):
+    def playAttacks(self, print_ = False):
         nextMove = self.getNextMove()
         possibleAttacks = self.game_team.getPossibleAttacks()
         i = 0
@@ -305,7 +306,7 @@ class MonteCarloTreeSearchStrategy(Strategy):
             nextMove = self.getNextMove()
             i += 1
     
-    def playTurn(self, print_ = True):
+    def playTurn(self, print_ = False):
         self.playAddTroops(print_ = print_)
         self.playAttacks(print_ = print_)
     
