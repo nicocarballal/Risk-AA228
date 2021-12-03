@@ -68,18 +68,18 @@ def rollout(discount,sp,d,my_team,opponent, print_ = False):
         my_team.playAttacks(print_ = print_)
        
         if my_team.hasTeamWon():
-            r = 100
+            r = 1000
             return (discount**t)*r
         opponent.playTurn(print_ = print_)
         if opponent.hasTeamWon():
-            r = -1
+            r = -1000
             return (discount**t)*r
         my_team.playAddTroops(print_ = print_)
     if my_team.hasTeamWon():
-        r = 100
+        r = 1000
         return (discount**(d-1))*r
     elif opponent.hasTeamWon():
-        r = -1
+        r = -1000
         return (discount**(d-1))*r
     else:
         #print(BST_Heuristic(my_team,sp))
