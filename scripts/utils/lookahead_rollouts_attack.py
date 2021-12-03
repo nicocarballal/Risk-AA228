@@ -9,11 +9,11 @@ import matplotlib.pyplot as plt
 
 import copy
 
-def rollout_lookahead(team,riskMap,d,discount, print_ = False):
+def rollout_lookahead(team,riskMap,d,discount, heuristic = EdgeWin, print_ = False):
     '''Returns the best action according to lookahead with rollouts'''
-    return greedy(team,riskMap,d,discount, print_ = print_)[0]
+    return greedy(team,riskMap,d,discount, heuristic = heuristic, print_ = print_)[0]
 
-def greedy(team,riskMap,d,discount, print_ = False):
+def greedy(team,riskMap,d,discount, heuristic = EdgeWin, print_ = False):
     '''Greedily looks through all possible actions and determines the value of each from the current state
     using lookahead with rollouts. Returns action with maximum value and the value itself'''
     possible_attackers = team.getPossibleAttacks()
@@ -26,7 +26,7 @@ def greedy(team,riskMap,d,discount, print_ = False):
             action = (attacker,defender)
             #print("Action: ", action)
             #print('---------------')
-            u = lookahead(discount,riskMap,action,d, team = team, print_ = print_)
+            u = lookahead(discount,riskMap,action,d, heuristic = heuristic, team = team, print_ = print_)
             lookahead_list.append((action,u))
     if print_:
         print("Lookahead List:", lookahead_list)
@@ -35,7 +35,7 @@ def greedy(team,riskMap,d,discount, print_ = False):
   
     return max(lookahead_list, key = lambda x: x[1])
 
-def lookahead(discount,riskMap,action,d, team = None, print_ = False):
+def lookahead(discount,riskMap,action,d, heuristic = EdgeWin, team = None, print_ = False):
     ''' Computes successor states and probabilities of these successor states given the current riskMap
 
     Then for each of these successor states performs a rollout to get a value that that successor state and
@@ -82,14 +82,14 @@ def lookahead(discount,riskMap,action,d, team = None, print_ = False):
                         defending_team = sp.getTeam(territory)
                         break         
                 if defending_team is None:
-                    sum_successors = 1/trials * EdgeWin(attacking_team,sp)      
+                    sum_successors = 1/trials * heuristic(attacking_team,sp,  opponent = None)      
                     return discount * sum_successors
                 attack_teams = False
 
             # Gets value of successor state via rollout and multiplies by the transition probability to add to sum
             prob = succ_state_probs[succ]       
 
-            sum_successors += 1/trials * prob*rollout(discount,sp,d,attacking_team,defending_team, print_ = print_, attack_teams = attack_teams)
+            sum_successors += 1/trials * prob*rollout(discount,sp,d,attacking_team,defending_team, heuristic = heuristic, print_ = print_, attack_teams = attack_teams)
 
     return discount*sum_successors
 
@@ -144,7 +144,7 @@ def set_up_sp(sp,succ,attacking_team,defending_team,attacking_territory,defendin
         # Move all but one remaining attacking troops to the territory
         attacking_team.moveTroops(attacking_territory, defending_territory, succ_num_attackers - 1)
 
-def rollout(discount,sp,d,my_team,opponent, print_ = False, attack_teams = True):
+def rollout(discount,sp,d,my_team,opponent, heuristic = EdgeWin, print_ = False, attack_teams = True):
     '''Rolls out using a stochastic policy (this is encoded in the strategy of my_team itself) against player.
     Repeats rounds of turns to depth. If my_team wins, the reward is 100. If the opponent wins, the reward is 0.
     Otherwise, at the end of the rollout, we use the BST heuristic for both teams and the reward. We see what percentage
@@ -174,7 +174,7 @@ def rollout(discount,sp,d,my_team,opponent, print_ = False, attack_teams = True)
         #BST_my_team_sum = sum(list(BST_Heuristic(my_team,sp).values()))
         #BST_opponent_sum = sum(list(BST_Heuristic(opponent,sp).values()))
         #r = 100*BST_opponent_sum/(BST_my_team_sum+BST_opponent_sum)
-        r = 100*EdgeWin(my_team,sp)
+        r = 100*heuristic(my_team,sp, opponent = opponent)
         
         #r = 100 * sum(list(BSR_Heuristic(my_team, sp)))
         if print_:

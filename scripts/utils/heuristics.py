@@ -23,7 +23,7 @@ def BST_Heuristic(team, risk_map):
         BST_dict[territory] = BST/risk_map.getTroops(territory)
     return BST_dict
 
-def BSR_Heuristic(team, risk_map):
+def BSR_Heuristic(team, risk_map, opponent = None):
     '''
     Returns normalized version of the Border Securty Threat
 
@@ -34,18 +34,28 @@ def BSR_Heuristic(team, risk_map):
     Output:
         BSR_dict: type dictionary { keys --> names of territories; values --> BSR ratings}
     '''
+    if opponent is None:
+        return 100
+        
     BSR_dict = BST_Heuristic(team, risk_map)
+    BSR_opp_dict = BST_Heuristic(opponent, risk_map)
     factor=1.0/sum(BSR_dict.values())
+    factor2=1.0/sum(BSR_opp_dict.values())
     for country in BSR_dict:
         BSR_dict[country] = BSR_dict[country]*factor
-    return BSR_dict
+    for country in BSR_opp_dict:
+        BSR_opp_dict[country] = BSR_opp_dict[country]*factor2
+    BST_my_team_sum = sum(list(BSR_dict.values()))
+    BST_opponent_sum = sum(list(BSR_opp_dict.values()))
+    r = 100*BST_opponent_sum/(BST_my_team_sum+BST_opponent_sum)
+    return r
 
 def Countries_Heuristic(team, risk_map):
     return len(team.getTerritories())
 
 def Troops_Heuritic(team, risk_map):
     return self.team.getTroops()
-def EdgeWin(team, game_map):
+def EdgeWin(team, game_map, opponent = None):
     """This function takes a game map (i.e. a state) and returns
     the % equity they have in the game
 

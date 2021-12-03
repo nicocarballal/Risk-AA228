@@ -1,6 +1,7 @@
 import networkx as nx
 import random
 import numpy as np
+from utils.heuristics import BST_Heuristic, EdgeWin, Countries_Heuristic, BSR_Heuristic
 
 class GameTeam:
     '''
@@ -18,7 +19,7 @@ class GameTeam:
 
     '''
 
-    def __init__(self, team_name, risk_map, strategy = None, territories = [], num_troops = 0, continents_owned = None, cards = None):
+    def __init__(self, team_name, risk_map, heuristic = EdgeWin, strategy = None, territories = [], num_troops = 0, continents_owned = None, cards = None):
         self.name = team_name
         self.territories = territories
         self.continents_owned = continents_owned
@@ -28,11 +29,11 @@ class GameTeam:
         if strategy == None:
             self.strategy = None
         else:
-            self.strategy = strategy(self)
+            self.strategy = strategy(self, Heuristic = heuristic)
         self.risk_map.teams[team_name] = self
 
-    def setStrategy(self,strategy_class):
-        self.strategy = strategy_class(self)
+    def setStrategy(self,strategy_class, Heuristic = EdgeWin):
+        self.strategy = strategy_class(self, Heuristic = Heuristic)
 
     def getName(self):
         return self.name
@@ -95,14 +96,14 @@ class GameTeam:
         return self.strategy
 
 
-    def changeStrategy(self, StrategyClass):
+    def changeStrategy(self, StrategyClass, Heuristic = EdgeWin):
         '''
         Change your teams strategy at any given time!
 
         Inputs:
         - StrategyClass --> Will need to pass the Strategy class like so "self.changeStrategy(RandomStrategy)
         '''
-        self.strategy = StrategyClass(self)
+        self.strategy = StrategyClass(self, Heuristic = Heuristic)
 
     def getRiskMap(self):
         return self.risk_map

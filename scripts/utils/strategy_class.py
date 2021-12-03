@@ -3,6 +3,7 @@ import random
 import copy
 import utils.lookahead_rollouts_attack as lrattack
 import utils.lookahead_rollouts_add as lradd
+from utils.heuristics import BST_Heuristic, EdgeWin, Countries_Heuristic, BSR_Heuristic
 
 class Strategy:
     '''
@@ -20,7 +21,7 @@ class Strategy:
 
     '''
 
-    def __init__(self, game_team):
+    def __init__(self, game_team, Heuristic = EdgeWin):
         self.game_team = game_team
 
     def getTeamName(self):
@@ -34,6 +35,21 @@ class Strategy:
         Return the team the given strategy will return for.
         '''
         return self.game_team
+    
+    def getContinentBonus(self):
+        NA = ['Alaska', 'North West Territory', 'Greenland', 'Alberta', 'Ontario', 'Quebec', 'Western United States', 'Eastern United States', 'Central America']
+        SA = ['Venezuela', 'Brazil', 'Peru', 'Argentina']
+        AF = ['North Africa', 'Egypt', 'Congo', 'East Africa', 'South Africa', 'Madagascar']
+        EU = ['Great Britain', 'Iceland', 'Scandinavia', 'Ukraine', 'Northern Europe', 'Western Europe', 'Southern Europe']
+        AS = ['Middle East', 'India', 'China', 'Siam', 'Afghanistan', 'Ural', 'Siberia', 'Yakutsk', 'Kamchatka', 'Mongolia', 'Japan', 'Irkutsk']
+        AU = ['Indonesia', 'New Guinea', 'Western Australia', 'Eastern Australia']
+        continents = [NA, SA, AF, EU, AS, AU] 
+        continent_bonuses = [5, 2, 3, 5, 7, 2]
+        total_bonus = 0
+        for continent, bonus in zip(continents, continent_bonuses): 
+            if all([country in self.game_team.getTerritories() for country in continent]):
+                total_bonus += bonus
+        return total_bonus
 
     def getPossibleAttacks(self):
         '''
@@ -100,7 +116,7 @@ class RandomStrategy(Strategy):
     '''
     This strategy picks moves and adds troops at random! It's as simple as that :)
     '''
-    def __init__(self, game_team):
+    def __init__(self, game_team, Heuristic = EdgeWin):
         super().__init__(game_team)
 
     def getNextMove(self, print_ = False, depth_ = 1):
@@ -118,7 +134,7 @@ class RandomStrategy(Strategy):
                 print("Adding {num_troops} to {territory}!".format(num_troops = 1, territory = territory))
 
     def playAddTroops(self, print_ = False, depth_ = 1):
-        self.addTroopsTurn(max(3, len(self.game_team.getTerritories()) // 3), print_ = print_)
+        self.addTroopsTurn(max(3, len(self.game_team.getTerritories()) // 3  + self.getContinentBonus()), print_ = print_)
 
     def playAttacks(self, print_ = False, depth_ = 1):
         nextMove = self.getNextMove()
@@ -137,7 +153,7 @@ class RuleOfThumbStrategy(Strategy):
     '''
     This strategy picks the moves in which you have more troops than the opponent
     '''
-    def __init__(self, game_team):
+    def __init__(self, game_team, Heuristic = EdgeWin):
         super().__init__(game_team)
 
     def getNextMove(self, print_ = False, depth_ = 1):
@@ -192,7 +208,7 @@ class RuleOfThumbStrategy(Strategy):
             return
 
     def playAddTroops(self, print_ = False, depth_ = 1):
-        self.addTroopsTurn(max(3, len(self.game_team.getTerritories()) // 3), print_ = print_) # Default for RISK
+        self.addTroopsTurn(max(3, len(self.game_team.getTerritories()) // 3 + self.getContinentBonus()), print_ = print_) # Default for RISK
 
     def playAttacks(self, print_ = False, depth_ = 1):
         nextMove = self.getNextMove()
@@ -215,7 +231,8 @@ class LookaheadRolloutStrategy(Strategy):
     This strategy picks moves and adds troops at random! It's as simple as that :)
     We are assuming 1 opponent
     '''
-    def __init__(self, game_team):
+    def __init__(self, game_team, Heuristic = EdgeWin):
+        self.heuristic = Heuristic
         super().__init__(game_team)
 
     def getNextMove(self, print_ = False, depth_ = 1):
@@ -228,8 +245,8 @@ class LookaheadRolloutStrategy(Strategy):
                 ro_opponent = ro_map.teams[team_name]
         ro_my_team.setStrategy(RuleOfThumbStrategy)
         ro_opponent.setStrategy(RuleOfThumbStrategy)
-        next_move = lrattack.rollout_lookahead(ro_my_team,ro_map,depth_,.75, print_ = print_)
-        ro_my_team.setStrategy(LookaheadRolloutStrategy)
+        next_move = lrattack.rollout_lookahead(ro_my_team,ro_map,depth_,.75, heuristic = self.heuristic, print_ = print_)
+        ro_my_team.setStrategy(LookaheadRolloutStrategy, Heuristic = self.heuristic)
         print("Team {name} officially attacking from {attack} to {defend}!".format(name = self.game_team.getName(), attack = next_move[0], defend = next_move[1]))
         return next_move
 
@@ -244,14 +261,17 @@ class LookaheadRolloutStrategy(Strategy):
                 ro_opponent = ro_map.teams[team_name]
         ro_my_team.setStrategy(RuleOfThumbStrategy)
         ro_opponent.setStrategy(RuleOfThumbStrategy)
-        territory = lradd.rollout_lookahead(ro_my_team,ro_opponent,ro_map,depth_,.75, num_troops = num_troops, print_ = print_)
-        ro_my_team.setStrategy(LookaheadRolloutStrategy)
+        territory = lradd.rollout_lookahead(ro_my_team,ro_opponent,ro_map,depth_,.75, heuristic = self.heuristic, num_troops = num_troops, print_ = print_)
+        ro_my_team.setStrategy(LookaheadRolloutStrategy, Heuristic = self.heuristic)
         self.game_team.addTroops(territory, num_troops)
 
         print("Adding {num_troops} officially to {territory}!".format(num_troops = num_troops, territory = territory))
 
     def playAddTroops(self, print_ = False, depth_ = 1):
-        self.addTroopsTurn(max(3, len(self.game_team.getTerritories()) // 3), print_ = print_, depth_ = depth_)
+        b = self.getContinentBonus()
+        if b > 0:
+            print("Team {team} officially receiving {bonus}".format(team = self.game_team.getName(), bonus = b))
+        self.addTroopsTurn(max(3, len(self.game_team.getTerritories()) // 3 + b), print_ = print_, depth_ = depth_)
 
     def playAttacks(self, print_ = False, depth_ = 1):
         nextMove = self.getNextMove(print_ = print_, depth_ = depth_)

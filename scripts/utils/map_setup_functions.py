@@ -1,8 +1,9 @@
 from utils.game_map_class import GameMap
 from utils.game_team_class import GameTeam
+from utils.heuristics import BST_Heuristic, EdgeWin, Countries_Heuristic, BSR_Heuristic
 import random
 
-def setGameBoardRandom(team_names, risk_map, strategy_classes = [None, None]):
+def setGameBoardRandom(team_names, risk_map, heuristics = [EdgeWin, EdgeWin], strategy_classes = [None, None]):
     '''
     Inputs:
     team_names: Your desired team names
@@ -16,9 +17,10 @@ def setGameBoardRandom(team_names, risk_map, strategy_classes = [None, None]):
     teams = []
     i = 0
     for i in range(len(team_names)):
+        heuristic = heuristics[i]
         strategy_class = strategy_classes[i]
         team_name = team_names[i]
-        teams.append(GameTeam(team_name, risk_map, strategy = strategy_class, territories = []))
+        teams.append(GameTeam(team_name, risk_map, strategy = strategy_class, heuristic = heuristic, territories = []))
     num_teams = len(teams)
     i = 0
     territories = risk_map.getTerritories()
@@ -29,7 +31,13 @@ def setGameBoardRandom(team_names, risk_map, strategy_classes = [None, None]):
         risk_map.setTeam(block, team_names[i % num_teams])
         i += 1
     return risk_map, teams
-
+def setGameBoardRandomWithTroops(team_names, risk_map, heuristics = [EdgeWin, EdgeWin], strategy_classes = [None, None]):
+    risk_map, teams = setGameBoardRandom(team_names, risk_map, heuristics = heuristics, strategy_classes = strategy_classes)
+    for team in teams:
+        for i in range(19):
+            random_territory = random.choice(team.getTerritories())
+            team.addTroops(random_territory, 1)
+    return risk_map, teams
 
 def initializeFullRiskMap():
     risk_blocks = \

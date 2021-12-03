@@ -9,11 +9,11 @@ import matplotlib.pyplot as plt
 
 import copy
 
-def rollout_lookahead(team,opponent,riskMap,d,discount, num_troops = 1, print_ = False):
+def rollout_lookahead(team,opponent,riskMap,d,discount, heuristic = EdgeWin, num_troops = 1, print_ = False):
     '''Returns the best action according to lookahead with rollouts'''
-    return greedy(team,opponent,riskMap,d,discount, num_troops = num_troops, print_ = print_)[0]
+    return greedy(team,opponent,riskMap,d,discount, heuristic = heuristic, num_troops = num_troops, print_ = print_)[0]
 
-def greedy(team,opponent,riskMap,d,discount, num_troops = 1, print_ = False):
+def greedy(team,opponent,riskMap,d,discount, heuristic = EdgeWin, num_troops = 1, print_ = False):
     '''Greedily looks through all possible actions and determines the value of each from the current state
     using lookahead with rollouts. Returns action with maximum value and the value itself'''
     possible_destinations = team.getPossibleAttacks(attack_condition = 0).keys()
@@ -23,7 +23,7 @@ def greedy(team,opponent,riskMap,d,discount, num_troops = 1, print_ = False):
     for dest in possible_destinations:
         #print("Try adding 1 troop to {dest}".format(dest = dest))
         action = dest
-        u = lookahead(discount,riskMap,action,d,team.name,opponent.name, num_troops = num_troops, print_ = print_)
+        u = lookahead(discount,riskMap,action,d,team.name,opponent.name, heuristic = heuristic, num_troops = num_troops, print_ = print_)
         lookahead_list.append((action,u))
     if print_:
         print("Lookahead List:", lookahead_list)
@@ -31,7 +31,7 @@ def greedy(team,opponent,riskMap,d,discount, num_troops = 1, print_ = False):
         return (None,None)
     return max(lookahead_list, key = lambda x: x[1])
 
-def lookahead(discount,riskMap,action,d,team_name,opponent_name, num_troops = 1, print_ = False):
+def lookahead(discount,riskMap,action,d,team_name,opponent_name, heuristic = EdgeWin, num_troops = 1, print_ = False):
     ''' Computes successor states and probabilities of these successor states given the current riskMap
 
     Then for each of these successor states performs a rollout to get a value that that successor state and
@@ -52,11 +52,11 @@ def lookahead(discount,riskMap,action,d,team_name,opponent_name, num_troops = 1,
 
         my_team.addTroops(action, num_troops)
 
-        sum_successors += 1/trials*rollout(discount,sp,d,my_team,opponent, print_ = print_)
+        sum_successors += 1/trials*rollout(discount,sp,d,my_team,opponent, heuristic = heuristic, print_ = print_)
 
     return discount*sum_successors
 
-def rollout(discount,sp,d,my_team,opponent, print_ = False):
+def rollout(discount,sp,d,my_team,opponent, heuristic = EdgeWin, print_ = False):
     '''Rolls out using a stochastic policy (this is encoded in the strategy of my_team itself) against player.
     Repeats rounds of turns to depth. If my_team wins, the reward is 100. If the opponent wins, the reward is 0.
     Otherwise, at the end of the rollout, we use the BST heuristic for both teams and the reward. We see what percentage
@@ -86,7 +86,7 @@ def rollout(discount,sp,d,my_team,opponent, print_ = False):
         #BST_my_team_sum = sum(list(BST_Heuristic(my_team,sp).values()))
         #BST_opponent_sum = sum(list(BST_Heuristic(opponent,sp).values()))
         #r = 100*BST_opponent_sum/(BST_my_team_sum+BST_opponent_sum)
-        r = 100*EdgeWin(my_team,sp)
+        r = 100*heuristic(my_team,sp, opponent = opponent)
         if print_:
             print("Rollout Reward: ", (discount**(d-1))*r)
         return (discount**(d-1))*r
