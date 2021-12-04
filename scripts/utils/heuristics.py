@@ -35,26 +35,28 @@ def BSR_Heuristic(team, risk_map, opponent = None):
         BSR_dict: type dictionary { keys --> names of territories; values --> BSR ratings}
     '''
     if opponent is None:
-        return 100
+        return 1
         
     BSR_dict = BST_Heuristic(team, risk_map)
     BSR_opp_dict = BST_Heuristic(opponent, risk_map)
-    factor=1.0/sum(BSR_dict.values())
-    factor2=1.0/sum(BSR_opp_dict.values())
-    for country in BSR_dict:
-        BSR_dict[country] = BSR_dict[country]*factor
-    for country in BSR_opp_dict:
-        BSR_opp_dict[country] = BSR_opp_dict[country]*factor2
-    BST_my_team_sum = sum(list(BSR_dict.values()))
-    BST_opponent_sum = sum(list(BSR_opp_dict.values()))
-    r = 100*BST_opponent_sum/(BST_my_team_sum+BST_opponent_sum)
-    return r
+    
+    n_BSR = len(BSR_dict)
+    n_BSR_opp = len(BSR_opp_dict)
+    print(n_BSR, n_BSR_opp)
+    
+    BSR = sum(BSR_dict.values())/(n_BSR**2)
+    BSR_opp = sum(BSR_opp_dict.values())/(n_BSR_opp**2)
+    print(BSR_opp/BSR)
+    return BSR_opp/(BSR + BSR_opp)
 
-def Countries_Heuristic(team, risk_map):
-    return len(team.getTerritories())
+def Countries_Heuristic(team, risk_map, opponent = None):
+    return len(team.getTerritories())/len(risk_map.getTerritories())
 
-def Troops_Heuritic(team, risk_map):
-    return self.team.getTroops()
+def Troops_Heuristic(team, risk_map, opponent = None):
+    if opponent == None:
+        return 1
+    return team.getTroops()/(opponent.getTroops() + team.getTroops())
+
 def EdgeWin(team, game_map, opponent = None):
     """This function takes a game map (i.e. a state) and returns
     the % equity they have in the game

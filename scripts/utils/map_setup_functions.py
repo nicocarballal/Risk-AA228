@@ -31,6 +31,7 @@ def setGameBoardRandom(team_names, risk_map, heuristics = [EdgeWin, EdgeWin], st
         risk_map.setTeam(block, team_names[i % num_teams])
         i += 1
     return risk_map, teams
+
 def setGameBoardRandomWithTroops(team_names, risk_map, heuristics = [EdgeWin, EdgeWin], strategy_classes = [None, None]):
     risk_map, teams = setGameBoardRandom(team_names, risk_map, heuristics = heuristics, strategy_classes = strategy_classes)
     for team in teams:
