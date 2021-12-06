@@ -36,6 +36,21 @@ class Strategy:
         '''
         return self.game_team
 
+    def getContinentBonus(self):
+        NA = ['Alaska', 'North West Territory', 'Greenland', 'Alberta', 'Ontario', 'Quebec', 'Western United States', 'Eastern United States', 'Central America']
+        SA = ['Venezuela', 'Brazil', 'Peru', 'Argentina']
+        AF = ['North Africa', 'Egypt', 'Congo', 'East Africa', 'South Africa', 'Madagascar']
+        EU = ['Great Britain', 'Iceland', 'Scandinavia', 'Ukraine', 'Northern Europe', 'Western Europe', 'Southern Europe']
+        AS = ['Middle East', 'India', 'China', 'Siam', 'Afghanistan', 'Ural', 'Siberia', 'Yakutsk', 'Kamchatka', 'Mongolia', 'Japan', 'Irkutsk']
+        AU = ['Indonesia', 'New Guinea', 'Western Australia', 'Eastern Australia']
+        continents = [NA, SA, AF, EU, AS, AU] 
+        continent_bonuses = [5, 2, 3, 5, 7, 2]
+        total_bonus = 0
+        for continent, bonus in zip(continents, continent_bonuses): 
+            if all([country in self.game_team.getTerritories() for country in continent]):
+                total_bonus += bonus
+        return total_bonus
+    
     def getPossibleAttacks(self):
         '''
         Get all of the possible attacks for your team at a given map state.
@@ -119,7 +134,7 @@ class RandomStrategy(Strategy):
                 print("Adding {num_troops} to {territory}!".format(num_troops = 1, territory = territory))
 
     def playAddTroops(self, print_ = False):
-        self.addTroopsTurn(max(3, len(self.game_team.getTerritories()) // 3), print_ = print_)
+        self.addTroopsTurn(max(3, len(self.game_team.getTerritories()) // 3  + self.getContinentBonus()), print_ = print_)
 
     def playAttacks(self, print_ = False):
         nextMove = self.getNextMove()
@@ -191,7 +206,7 @@ class RuleOfThumbStrategy(Strategy):
             return
 
     def playAddTroops(self, print_ = False):
-        self.addTroopsTurn(max(3, len(self.game_team.getTerritories()) // 3), print_ = print_) # Default for RISK
+        self.addTroopsTurn(max(3, len(self.game_team.getTerritories()) // 3  + self.getContinentBonus()), print_ = print_)
 
     def playAttacks(self, print_ = False):
         nextMove = self.getNextMove()
@@ -247,7 +262,7 @@ class LookaheadRolloutStrategy(Strategy):
                 print("Adding {num_troops} to {territory}!".format(num_troops = 1, territory = territory))
 
     def playAddTroops(self, print_ = False):
-        self.addTroopsTurn(max(3, len(self.game_team.getTerritories()) // 3), print_ = print_)
+        self.addTroopsTurn(max(3, len(self.game_team.getTerritories()) // 3  + self.getContinentBonus()), print_ = print_)
 
     def playAttacks(self, print_ = False):
         nextMove = self.getNextMove()
@@ -276,7 +291,7 @@ class MonteCarloTreeSearchStrategy(Strategy):
             if name != team_name:
                 opponent = risk_map.teams[name]
         opponent.setStrategy(RandomStrategy)
-        action = mcts.monteCarloTreeSearch(risk_map, team_name, 'attack', 100, 30, 0.95, 1000)
+        action = mcts.monteCarloTreeSearch(risk_map, team_name, 'attack', RuleOfThumbStrategy, 10, 20, 0.95, 500)
         if print_ == True and action != None:
             print('attacking ' + action[1] + ' from ' + action[0])
         return action
@@ -288,14 +303,14 @@ class MonteCarloTreeSearchStrategy(Strategy):
             if name != team_name:
                 opponent = risk_map.teams[name]
         opponent.setStrategy(RandomStrategy)
-        action = mcts.monteCarloTreeSearch(risk_map, team_name, 'add', 100, 30, 0.95, 1000)
+        action = mcts.monteCarloTreeSearch(risk_map, team_name, 'add', RuleOfThumbStrategy, 10, 20, 0.95, 500)
         self.game_team.addTroops(action, num_troops)
         if print_ == True:
             print('adding ' + num_troops + ' troops to ' + action) 
         return action
     
     def playAddTroops(self, print_ = False):
-        self.addTroopsTurn(max(3, len(self.game_team.getTerritories()) // 3), print_ = print_)
+        self.addTroopsTurn(max(3, len(self.game_team.getTerritories()) // 3  + self.getContinentBonus()), print_ = print_)
     
     def playAttacks(self, print_ = False):
         nextMove = self.getNextMove()

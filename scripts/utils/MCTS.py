@@ -11,18 +11,17 @@ import math
 import random
 from collections import defaultdict
 
-def monteCarloTreeSearch(risk_map, team_name, action_type, c, depth, discount, num_sims):
+def monteCarloTreeSearch(risk_map, team_name, action_type, rollout_strategy, c, depth, discount, num_sims):
     N = defaultdict(int)
     Q = defaultdict(float)
     for i in range(num_sims):
-        simulate(risk_map, team_name, action_type, N, Q, c, depth, discount)
+        simulate(risk_map, team_name, action_type, rollout_strategy, N, Q, c, depth, discount)
     actions = getActions(risk_map, team_name, action_type)
     if len(actions) != 0:
         best_action = actions[0]
         for action in getActions(risk_map, team_name, action_type):
             if Q[(risk_map, action)] > Q[(risk_map, best_action)]:
                 best_action = action
-        print(best_action)
         return best_action
     else:
         return None
@@ -32,6 +31,7 @@ def getValue(risk_map, team_name):
     Uses EdgeWin approximate evaulation function for now, can also replace with rollout?
     '''
     return 100 * EdgeWin(risk_map.teams[team_name], risk_map)
+    # return rollout(risk_map, team_name, action_type, rollout_strategy)
 
 def getActions(risk_map, team_name, action_type):
     if action_type == 'add':
@@ -77,20 +77,45 @@ def compute_succ_state_prob(prob,num_attackers,num_defenders,succ_state_probs):
         compute_succ_state_prob(prob*2611/7776,num_attackers - 1, num_defenders - 1,succ_state_probs)
         compute_succ_state_prob(prob*2275/7776,num_attackers - 2, num_defenders,succ_state_probs)        
 
-def simulate(risk_map, team_name, action_type, N, Q, c, depth, discount): 
+def rollout(risk_map, team_name, action_type, rollout_strategy):
+    copy_map = copy.deepcopy(risk_map)
+    team = copy_map.teams[team_name]
+    for name in copy_map.teams:
+        if name != team_name:
+            opponent = copy_map.teams[name]
+    team.setStrategy(rollout_strategy)
+    opponent.setStrategy(rollout_strategy)
+    if action_type == 'add':
+        while team.hasTeamWon() == False and opponent.hasTeamWon() == False:
+            team.playTurn()
+            if team.hasTeamWon() == True:
+                break
+            opponent.playTurn()
+    elif action_type == 'attack':
+        team.playAttacks()
+        while team.hasTeamWon() == False and opponent.hasTeamWon() == False:
+            opponent.playTurn()
+            if opponent.hasTeamWon() == True:
+                break
+            team.playTurn()
+    else:
+        raise Exception('not a valid action_type')
+    if team.hasTeamWon():
+        return 1
+    else:
+        return 0
+        
+def simulate(risk_map, team_name, action_type, rollout_strategy, N, Q, c, depth, discount): 
     '''
     N, Q are dictionaries from (s, a) to N(s, a) and Q(s, a) respectively
-    This means storing many copies of GameMap but I am not sure a way around this
-    I make the assumption that the add phase adds all soldiers to one country, since I think
-    this is close to optimal and it should greatly reduce computational complexity
     '''
     for name in risk_map.teams:
         if name != team_name:
             opponent = risk_map.teams[name]
     if risk_map.teams[team_name].hasTeamWon():
-        return 10000 # not sure about this value
+        return 1000 # not sure about this value
     if opponent.hasTeamWon():
-        return -10000 # not sure about this value
+        return -1000 # not sure about this value
     if depth <= 0:
         return getValue(risk_map, team_name) # or can use rollout?
     if (risk_map, getActions(risk_map, team_name, action_type)[0]) not in N: 
@@ -100,11 +125,12 @@ def simulate(risk_map, team_name, action_type, N, Q, c, depth, discount):
         return getValue(risk_map, team_name) # or can use rollout
     action = explore(risk_map, team_name, action_type, N, Q, c)
     succ_map = generate_succ(risk_map, team_name, action, action_type)
+    reward = 0
     reward = getValue(succ_map, team_name) - getValue(risk_map, team_name) # would change to smth related to soldiers, too dependent on the edgeWin heuristic currently
     if action == None:
-        q = reward + discount * simulate(succ_map, team_name, 'add', N, Q, c, depth - 1, discount)
+        q = reward + discount * simulate(succ_map, team_name, 'add', rollout_strategy, N, Q, c, depth - 1, discount)
     else:
-        q = reward + discount * simulate(succ_map, team_name, 'attack', N, Q, c, depth - 1, discount)
+        q = reward + discount * simulate(succ_map, team_name, 'attack', rollout_strategy, N, Q, c, depth - 1, discount)
     N[(risk_map, action)] += 1
     Q[(risk_map, action)] += (q - Q[(risk_map, action)]) / N[(risk_map, action)]
     return q
@@ -112,7 +138,7 @@ def simulate(risk_map, team_name, action_type, N, Q, c, depth, discount):
 def generate_succ(risk_map, team_name, action, action_type): 
     succ_map = copy.deepcopy(risk_map)
     if action_type == 'add':
-        num_troops = max(3, len(succ_map.teams[team_name].getTerritories()) // 3)
+        num_troops = max(3, len(succ_map.teams[team_name].getTerritories()) // 3 + getContinentBonus(risk_map, team_name))
         succ_map.teams[team_name].addTroops(action, num_troops)
     elif action_type == 'attack': 
         if action != None:
@@ -160,7 +186,20 @@ def explore(risk_map, team_name, action_type, N, Q, c):
         UCB1s.append(UCB1(risk_map, action, team_name, action_type, N, Q, c))
     return actions[UCB1s.index(max(UCB1s))]
 
-
+def getContinentBonus(risk_map, team_name):
+        NA = ['Alaska', 'North West Territory', 'Greenland', 'Alberta', 'Ontario', 'Quebec', 'Western United States', 'Eastern United States', 'Central America']
+        SA = ['Venezuela', 'Brazil', 'Peru', 'Argentina']
+        AF = ['North Africa', 'Egypt', 'Congo', 'East Africa', 'South Africa', 'Madagascar']
+        EU = ['Great Britain', 'Iceland', 'Scandinavia', 'Ukraine', 'Northern Europe', 'Western Europe', 'Southern Europe']
+        AS = ['Middle East', 'India', 'China', 'Siam', 'Afghanistan', 'Ural', 'Siberia', 'Yakutsk', 'Kamchatka', 'Mongolia', 'Japan', 'Irkutsk']
+        AU = ['Indonesia', 'New Guinea', 'Western Australia', 'Eastern Australia']
+        continents = [NA, SA, AF, EU, AS, AU] 
+        continent_bonuses = [5, 2, 3, 5, 7, 2]
+        total_bonus = 0
+        for continent, bonus in zip(continents, continent_bonuses): 
+            if all([country in risk_map.teams[team_name].getTerritories() for country in continent]):
+                total_bonus += bonus
+        return total_bonus
                      
     
     

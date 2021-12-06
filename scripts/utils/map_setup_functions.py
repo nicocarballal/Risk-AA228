@@ -30,6 +30,13 @@ def setGameBoardRandom(team_names, risk_map, strategy_classes = [None, None]):
         i += 1
     return risk_map, teams
 
+def setGameBoardRandomWithTroops(team_names, risk_map, strategy_classes = [None, None]):
+    risk_map, teams = setGameBoardRandom(team_names, risk_map, strategy_classes = strategy_classes)
+    for team in teams:
+        for i in range(19):
+            random_territory = random.choice(team.getTerritories())
+            team.addTroops(random_territory, 1)
+    return risk_map, teams
 
 def initializeFullRiskMap():
     risk_blocks = \
